@@ -1,0 +1,21 @@
+from pyspark.sql import SparkSession
+
+# Initialize Spark session
+spark = SparkSession.builder \
+    .appName("Corona Data Analysis") \
+    .getOrCreate()
+
+# Load the CSV file
+df = spark.read.csv("C:/data/coronaglobaldata.csv", header=True, inferSchema=True)
+
+# Show the first few rows of the dataset
+df.show()
+
+# Find the number of cases by continent
+df.groupBy("Continent").sum("TotalCases").show()
+
+# Find the number of deaths by location (Country)
+df.groupBy("Location").sum("TotalDeaths").show()
+
+# Stop the Spark session
+spark.stop()
