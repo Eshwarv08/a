@@ -1,3 +1,7 @@
+https://chatgpt.com/share/674de8bf-1de4-8003-846f-86543678214d
+
+
+-------------------------------------------------------------------
 from pyspark.sql import SparkSession
 
 # Initialize Spark session
