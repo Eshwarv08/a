@@ -19,3 +19,48 @@ df.groupBy("Location").sum("TotalDeaths").show()
 
 # Stop the Spark session
 spark.stop()
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import sum as _sum
+
+
+# Initialize Spark session
+spark = SparkSession.builder \
+    .appName("Corona Data Analysis") \
+    .getOrCreate()
+
+# Load the CSV file
+df = spark.read.csv("C:/datum/coronaglobaldata.csv", header=True, inferSchema=True)
+
+# Display the schema to understand the column names
+df.printSchema()
+
+
+
+
+# Assuming the correct columns are 'WHO_region' for continent and 'Cumulative_cases' for total cases
+continent_cases = df.groupBy("WHO_region").agg(_sum("Cumulative_cases").alias("Total_Cases"))
+
+# Assuming 'Country' is the location and 'Cumulative_deaths' for total deaths
+location_deaths = df.groupBy("Country").agg(_sum("Cumulative_deaths").alias("Total_Deaths"))
+
+# Display the results
+print("Total Cases by Continent (WHO Region):")
+continent_cases.show()
+
+print("Total Deaths by Location (Country):")
+location_deaths.show()
+
+
+
+# Stop the Spark session
+spark.stop()
