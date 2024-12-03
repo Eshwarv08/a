@@ -68,3 +68,57 @@ location_deaths.show()
 
 # Stop the Spark session
 spark.stop()
+
+
+------------------------------------+------------
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import sum as _sum
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Initialize Spark session
+spark = SparkSession.builder \
+    .appName("Corona Data Analysis") \
+    .getOrCreate()
+
+# Load the CSV file
+df = spark.read.csv("C:/datum/coronaglobaldata.csv", header=True, inferSchema=True)
+
+# Display the schema to understand the column names
+df.printSchema()
+
+# Assuming the correct columns are 'WHO_region' for continent and 'Cumulative_cases' for total cases
+continent_cases = df.groupBy("WHO_region").agg(_sum("Cumulative_cases").alias("Total_Cases"))
+
+# Assuming 'Country' is the location and 'Cumulative_deaths' for total deaths
+location_deaths = df.groupBy("Country").agg(_sum("Cumulative_deaths").alias("Total_Deaths"))
+
+# Convert to Pandas DataFrames for plotting
+continent_cases_pd = continent_cases.toPandas()
+location_deaths_pd = location_deaths.toPandas()
+
+# Plot total cases by continent
+plt.figure(figsize=(10, 6))
+plt.bar(continent_cases_pd['WHO_region'], continent_cases_pd['Total_Cases'], color='blue')
+plt.title('Total Cases by Continent (WHO Region)')
+plt.xlabel('WHO Region')
+plt.ylabel('Total Cases')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.savefig("cases_by_continent.png")  # Save the plot as an image
+plt.show()
+
+# Plot total deaths by location (top 10 countries with most deaths for clarity)
+top_countries = location_deaths_pd.sort_values(by='Total_Deaths', ascending=False).head(10)
+plt.figure(figsize=(12, 6))
+plt.bar(top_countries['Country'], top_countries['Total_Deaths'], color='red')
+plt.title('Total Deaths by Country (Top 10)')
+plt.xlabel('Country')
+plt.ylabel('Total Deaths')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.savefig("deaths_by_country.png")  # Save the plot as an image
+plt.show()
+
+# Stop the Spark session
+spark.stop()
